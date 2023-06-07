@@ -1,12 +1,11 @@
-<!-- <?php
-include "./includes/header.php"
-?> -->
+<?php
+include "./includes/admin_header.php";
+?>
 
   <body>
     <div id="wrapper">
       <!-- Navigation -->
-      <?php include "./includes/navigation.php" ?>
-
+      <?php include "./includes/admin_navigation.php" ?>
       <div id="page-wrapper">
         <div class="container-fluid">
           <!-- Page Heading -->
@@ -17,7 +16,22 @@ include "./includes/header.php"
                 <small>Author</small>
               </h1>
               <div class="col-xs-6">
-                  <form action="">
+                <!-- Inserting cateogies to db  -->
+                <?php
+                  if(isset($_POST["submit"])) {
+                   $cat_title = $_POST["cat_title"];
+                  }
+                    if($cat_title == "" || empty($cat_title)){
+                      echo '<span style="color: red;">Enter category</span>';
+                    }else {
+                      $query = "INSERT INTO categories (cat_title) VALUES ('$cat_title')";
+                      $create_category_query = mysqli_query($connection,$query);
+                      if(!$create_category_query) {
+                        die("QUERY FAILED" . mysqli_error($connection));
+                      }
+                    }
+                ?>
+                  <form action="" method="post">
                       <div class="form-group">
                         <label for="cat-title">Add Category</label>
                         <input class="form-control" type="text" name="cat_title">
@@ -37,10 +51,30 @@ include "./includes/header.php"
                       </tr>
                     </thead>
                     <tbody>
-              <tr>
-                <td>Recipes</td>
-                <td>Food</td>
-              </tr>
+                      <!-- FIND ALL CATEGORIES  -->
+                    <?php
+                    $query = "SELECT * FROM categories";
+                    $select_categories = mysqli_query($connection, $query);
+                      while($row = mysqli_fetch_array($select_categories)){
+                      $cat_id =  $row['cat_id'];
+                      $cat_title =  $row['cat_title'];
+                      echo "<tr>";
+                       echo "<td>{$cat_id}</td>";
+                       echo "<td>{$cat_title}</td>";
+                       echo "<td><a href='categories.php?delete={$cat_id}'>Delete</a></td>";
+                      echo "<tr>";
+                      }
+                    ?>
+                    <!-- delete categorie  -->
+                    <?php
+                      if(isset($_GET['delete'])){
+                          $the_cat_id = $_GET['delete'];
+                          $query = "DELETE FROM categories WHERE cat_id = {$the_cat_id} ";
+                            $delete_query = mysqli_query($connection,$query);
+                            header("Location: categories.php");
+                      }
+                    
+                    ?>
                     </tbody>
                   </table>
             </div>
@@ -50,7 +84,7 @@ include "./includes/header.php"
         <!-- /.container-fluid -->
       </div>
       <?php
-include "./includes/footer.php"
+include "./includes/admin_footer.php"
 ?>
       <!-- /#page-wrapper -->
     </div>
